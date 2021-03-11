@@ -10,4 +10,6 @@ Welcome to Ref Finance documentation site.
 
 ## Learn More
 
+* [Usage from CLI](cli-usage.md)
 * Read the [smart contract architecture](contracts/architecture.md)
+
