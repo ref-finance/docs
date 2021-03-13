@@ -14,15 +14,15 @@ Deploy to TestNet, to an account `$CONTRACT_ID` you have access keys for:
 ```
 export NEAR_ENV=default
 near deploy $CONTRACT_ID --wasmFile=res/ref_exchange.wasm
-near call $CONTRACT_ID new '' --accountId $CONTRACT_ID
+near call $CONTRACT_ID new "{\"owner_id\": \"$USER_ID\", \"exchange_fee\": 4, \"referral_fee\": 1}" --accountId $CONTRACT_ID
 ```
 
 # Add a simple pool
 
-Add simple pool with 2 tokens and 0.3% fee.
+Add simple pool with 2 tokens and 0.3% total fee (0.04% goes to exchange and 0.01% goes to referral).
 
 ```
-near call $CONTRACT_ID add_simple_pool "{\"tokens\": [\"$TOKEN1\", \"$TOKEN2\"], \"fee\": 30}" --accountId $USER_ID --amount 0.1
+near call $CONTRACT_ID add_simple_pool "{\"tokens\": [\"$TOKEN1\", \"$TOKEN2\"], \"fee\": 25}" --accountId $USER_ID --amount 0.1
 ```
 
 # Query pools
@@ -39,18 +39,24 @@ near view $CONTRACT_ID get_pools '{"from_index": 0, "limit": 10}'
 near call $CONTRACT_ID storage_deposit '' --accountId $USER_ID --amount 0.1
 ```
 
+# Check that account is registered and storage available
+
+```
+near view $CONTRACT_ID storage_balance_of "{\"account_id\": \"$USER_ID\"}"
+```
+
 # Deposit funds
 
 Before sending funds for token X, make sure that exchange is registered for token X.
 
 ```
-near call token1.$CONTRACT_ID storage_deposit \"{\"account_id\": "$CONTRACT_ID\"}" --accountId $USER_ID --amount 0.0125
+near call $TOKEN1 storage_deposit "{\"account_id\": \"$CONTRACT_ID\"}" --accountId $USER_ID --amount 0.0125
 ```
 
 Actually deposit funds to the exchange (attaching 1yN for security):
 
 ```
-near call token1.$CONTRACT_ID ft_transfer_call "{\"receiver_id\": \"$CONTRACT_ID\", \"amount\": \"1000000000000\", \"msg\": \"\"}' --accountId $USER_ID --amount 0.000000000000000000000001
+near call $TOKEN1 ft_transfer_call "{\"receiver_id\": \"$CONTRACT_ID\", \"amount\": \"1000000000000\", \"msg\": \"\"}" --accountId $USER_ID --amount 0.000000000000000000000001
 ```
 
 # Query deposit balances in the exchange
@@ -95,4 +101,18 @@ Swap via a single pool:
 
 ```
 near call $CONTRACT_ID swap "{\"actions\": [{\"pool_id\": 0, \"token_in\": \"$TOKEN1\", \"amount_in\": \"10000\", \"token_out\": \"$TOKEN2\", \"min_amount_out\": \"1\"}]}" --accountId $USER_ID
+```
+
+# Withdraw funds
+
+To withdraw specific token from exchange back to user's account:
+
+```
+near call $CONTRACT_ID withdraw "{\"token_id\": \"$TOKEN1\", \"amount\": \"900000000000\"}" --accountId $USER_ID --amount 0.000000000000000000000001
+```
+
+# Check owner
+
+```
+near view $CONTRACT_ID get_owner
 ```

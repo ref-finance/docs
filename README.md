@@ -8,8 +8,21 @@ Welcome to Ref Finance documentation site.
 
 **Ref Finance** is a collection of DeFi protocols powered by smart contracts on [NEAR Protocol](https://near.org) that enable trading, earning by providing liquidity and other financial use cases in the future.
 
+Highlights:
+ - Permission-less AMM pools for any NEAR's Fungible Tokens.
+ - Trading across multiple pools in one transaction.
+ - *1bps* referral fee on trading to pay the UI.
+ - **Coming:** *4bps* exchange fee to split between $REF token holders.
+ - **Coming v2:** constant weighted product AMM pool type.
+ - **Coming v3:** combining AMM with an order book via limit orders.
+ - **Coming v4:** lend / borrow.
+
 ## Learn More
 
 * [Usage from CLI](cli-usage.md)
 * Read the [smart contract architecture](contracts/architecture.md)
 
+## Community
+
+* [Telegram](https://t.me/ref_finance)
+* [Twitter](https://twitter.com/finance_ref)
