@@ -17,6 +17,13 @@ Highlights:
  - **Coming v3:** combining AMM with an order book via limit orders.
  - **Coming v4:** lend / borrow.
 
+## Deployments
+
+| Network | Account Id |
+| - | - |
+| MainNet | [ref-finance.near](https://explorer.near.org/accounts/ref-finance.near) |
+| TestNet | [ref-finance.testnet](https://explorer.testnet.near.org/accounts/ref-finance.testnet) |
+
 ## Learn More
 
 * [Usage from CLI](cli-usage.md)
