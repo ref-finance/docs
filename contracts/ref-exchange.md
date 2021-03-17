@@ -4,14 +4,22 @@ The Exchange contract is the main contract facilitating the trading. All pools a
 
 There are next main interactions:
  - Create a new pool with set of tokens
-    - Currently there is only equal weight constant product pool, called `simple_pool`. It supports up to 10 tokens.
-    - More pool types will be added over time via governance
+    - Currently there is only equal weight constant product of 2 tokens, called `simple_pool`.
+    - More pool types will be added over time via governance.
  - Call to register user's account with the exchange.
- - Deposit funds into the contract -- as a user you first need to deposit the funds into the contracts.
-    - User can have up to 10 different token balances (THIS IS GOING TO CHANGE)
+ - Deposit funds into the contract -- as a user you first need to deposit the funds into the contracts. There is a list of globally whitelisted tokens, or user can also separately register for tokens if they are not whitelisted (this is done to avoid malicious token contracts filling user's space).
  - Deposited funds can be put as liquidity into one of the pools.
- - Depoisted funds can be used to swap, including multihop between multiple pools.
+ - Depoisted funds can be used to swap, including multihop swap between multiple pools.
  - Withdraw funds back to the user's account from the contract.
+
+## Constructor
+
+Create new pool with given `owner_id` account that will have priviliaged access (like upgrades and whitelists) and `exchange_fee` in bps and `referral_fee` in bps that will be charged from pools on top of their LP pools.
+
+```
+    #[init]
+    pub fn new(owner_id: ValidAccountId, exchange_fee: u32, referral_fee: u32) -> Self;
+```
 
 ## Register or deposit more storage for user's account
 
@@ -29,7 +37,26 @@ This $NEAR can be retrieved back later, if user withdraws all it's deposits and 
 ```
 
 Notes:
- - `registration_only` is unused and can be always `None`.
+ - `registration_only` if passed, only attached $NEAR to cover minimum balance for account creation. The rest gets refunded.
+ - stores the amount of $NEAR passed at deposit to cover future deposits usage.
+
+## Register tokens for given user
+
+There is global whitelist, but users can register tokens they want to use separately. This makes sure that malicious token contracts can't spam user's storage.
+
+```
+    /// Registers given token in the user's account deposit.
+    /// Fails if not enough balance on this account to cover storage.
+    pub fn register_tokens(&mut self, token_ids: Vec<ValidAccountId>);
+```
+
+## Unregister token for given user
+
+```
+    /// Unregister given token from user's account deposit.
+    /// Fails if the balance of any given token is non 0.
+    pub fn unregister_tokens(&mut self, token_ids: Vec<ValidAccountId>);
+```
 
 ## Deposit
 
@@ -40,18 +67,27 @@ token.ft_transfer_call(<exchange contract>, <amount>, "");
 ```
 
 Notes:
-- make sure that `exchange contract` account has storage deposit in `token`. user code can call the `token.storage_deposit(Some(<exchange contract>))` covering 128 bytes of storage.
+- make sure that `exchange contract` account has storage deposit in `token`. User code can call the `token.storage_deposit(Some(<exchange contract>))` covering exactly 125 bytes of storage.
 - `msg` must be empty.
 
 This will call `ft_on_transfer` callback which will record the deposits.
+
+If token is not in the global whitelist or user haven't registered this token for themself - this will fail.
 
 ## Withdraw
 
 To withdraw funds, the request is made per token with required amount.
 
 ```
-pub fn withdraw(&mut self, token_id: AccountId, amount: U128);
+    /// Withdraws given token from the deposits of given user.
+    /// Optional unregister will try to remove record of this token from AccountDeposit for given user.
+    /// Unregister will fail if the left over balance is non 0.
+    #[payable]
+    pub fn withdraw(&mut self, token_id: ValidAccountId, amount: U128, unregister: Option<bool>);
 ```
+
+Notes:
+ - if `unregister` is `true` and `amount` is full amount on the account of the given user, can automatically call `unregister_tokens` on `token_id`. Allowing to free up some of the $NEAR locked for storage for this token.
 
 ## Add simple pool
 
@@ -65,7 +101,7 @@ pub fn add_simple_pool(&mut self, tokens: Vec<ValidAccountId>, fee: u32) -> u32;
 
 ## Add liquidity
 
-Add given amounts from depoisted into given pool. Amounts map to the tokens in the given pool.
+Add given amounts from deposited into given pool. Amounts map to the tokens in the given pool.
 
 The amounts must be deposited before calling this contract first.
 Fails if there is not enough tokens.
@@ -76,7 +112,7 @@ pub fn add_liquidity(&mut self, pool_id: u64, amounts: Vec<U128>);
 
 ## Remove liquidity
 
-Remove liquidity from given pool. Pass how many shares to withdraw and `min_amounts` of tokens of given pool that should be received (to prevent frontrunning).
+Remove liquidity from given pool. Pass how many shares to withdraw and `min_amounts` of tokens of given pool that should be received (to prevent front running).
 
 ```
 pub fn remove_liquidity(&mut self, pool_id: u64, shares: U128, min_amounts: Vec<U128>);
@@ -105,8 +141,11 @@ pub struct SwapAction {
 ```
 
 ```
-pub fn swap(&mut self, actions: Vec<SwapAction>) -> U128
+pub fn swap(&mut self, actions: Vec<SwapAction>, referral_id: Option<ValidAccountId>) -> U128
 ```
+
+Notes:
+ - `referral_id` is optional argument that allows frontends to get paid for facilitating transactions. If not provided, the `referral_fee` doesn't get paid out and goes to LPs.
 
 ## Get return
 
@@ -160,3 +199,23 @@ Get deposits of the user in the contract across all tokens.
 pub fn get_deposits(&self, account_id: &AccountId) -> HashMap<AccountId, U128>;
 ```
 
+## Get global token whitelist
+
+```
+pub fn get_whitelisted_tokens(&self) -> Vec<AccountId>;
+```
+
+## Get user token whitelist
+
+Returns tokens that are specifically allowed for given user (doesn't include global whitelist).
+
+```
+pub fn get_user_whitelisted_tokens(&self, account_id: &AccountId);
+```
+
+## Get owner
+
+```
+/// Get the owner of this account.
+pub fn get_owner(&self);
+```

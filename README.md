@@ -16,6 +16,7 @@ Highlights:
  - **Coming v2:** constant weighted product AMM pool type.
  - **Coming v3:** combining AMM with an order book via limit orders.
  - **Coming v4:** lend / borrow.
+ - **Coming in the distant future:** internal balances privacy: hide the balance of each user, removing ability to link two trades to the same user.
 
 ## Deployments
 
