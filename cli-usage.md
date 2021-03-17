@@ -39,6 +39,20 @@ near view $CONTRACT_ID get_pools '{"from_index": 0, "limit": 10}'
 near call $CONTRACT_ID storage_deposit '' --accountId $USER_ID --amount 0.1
 ```
 
+If there is a token that is not in whitelist, you also need to register it separately:
+
+```
+near call $CONTRACT_ID register_tokens '{\"token_ids\": [\"$TOKEN1\", \"$TOKEN2\"]}' --accountId $USER_ID
+```
+
+## Query whitelisted tokens
+
+This is list of tokens that don't need extra registration from the user. They are well known to the contract governance and are not expected to spam user's storage.
+
+```
+near view $CONTRACT_ID get_whitelisted_tokens
+```
+
 ## Check that account is registered and storage available
 
 ```
@@ -68,7 +82,7 @@ near view $CONTRACT_ID get_deposits "{\"account_id\": \"$USER_ID\"}"
 ## Add liquidity to a pool
 
 ```
-near call $CONTRACT_ID add_liquidity '{"pool_id": 0, "amounts": ["10000", "10000"]}' --accountId $USER_ID
+near call $CONTRACT_ID add_liquidity '{"pool_id": 0, "amounts": ["10000", "10000"]}' --accountId $USER_ID --amount 0.000000000000000000000001
 ```
 
 ## Get pool's information
@@ -86,7 +100,7 @@ near view $CONTRACT_ID get_pool_shares "{\"pool_id\": 0, \"account_id\": \"$USER
 ## Remove liquidity from a pool
 
 ```
-near call $CONTRACT_ID remove_liquidity '{"pool_id": 0, "shares": "1000000000000000000000000", "min_amounts": ["1", "1"]}' --accountId $USER_ID
+near call $CONTRACT_ID remove_liquidity '{"pool_id": 0, "shares": "1000000000000000000000000", "min_amounts": ["1", "1"]}' --accountId $USER_ID --amount 0.000000000000000000000001
 ```
 
 ## Output amount after swap
@@ -100,7 +114,7 @@ near view $CONTRACT_ID get_return "{\"pool_id\": 0, \"token_in\": \"$TOKEN1\", \
 Swap via a single pool:
 
 ```
-near call $CONTRACT_ID swap "{\"actions\": [{\"pool_id\": 0, \"token_in\": \"$TOKEN1\", \"amount_in\": \"10000\", \"token_out\": \"$TOKEN2\", \"min_amount_out\": \"1\"}]}" --accountId $USER_ID
+near call $CONTRACT_ID swap "{\"actions\": [{\"pool_id\": 0, \"token_in\": \"$TOKEN1\", \"amount_in\": \"10000\", \"token_out\": \"$TOKEN2\", \"min_amount_out\": \"1\"}]}" --accountId $USER_ID --amount 0.000000000000000000000001
 ```
 
 ## Withdraw funds
