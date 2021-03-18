@@ -91,6 +91,12 @@ near call $CONTRACT_ID add_liquidity '{"pool_id": 0, "amounts": ["10000", "10000
 near view $CONTRACT_ID get_pool '{"pool_id": 0}'
 ```
 
+## Get pool's accumulated volume
+
+```
+near view $CONTRACT_ID get_pool_volumes '{"pool_id": 0}'
+```
+
 ## Get number of liquidity shares in the pool
 
 ```
