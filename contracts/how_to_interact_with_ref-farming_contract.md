@@ -4,6 +4,16 @@ Here we using near-cli as tools to demonstrate how to interact with ref-farming 
 
 It's important for front-end developers to understand the interface logic from FE perspective.
 
+## assumption
+---
+```bash
+
+export FARMING=ref-farming.testnet
+export EX=ref-finance.testnet
+export TOKEN=token.ref-finance.testnet
+
+```
+
 ## views
 ---
 ### global info
@@ -88,7 +98,7 @@ near view $FARMING list_rewards_info '{"from_index": 0, "limit": 100}'
 
 **get single seed info**
 ```bash
-near view $FARMING get_seed_info '{"seed_id": "ref-finance.testnet@9"}'
+near view $FARMING get_seed_info "{\"seed_id\": \"$EX@9\"}"
 # return dict
 {
   seed_id: 'ref-finance.testnet@9',
@@ -106,7 +116,7 @@ near view $FARMING get_seed_info '{"seed_id": "ref-finance.testnet@9"}'
 
 **farms in a seed**
 ```bash
-near view $FARMING list_farms_by_seed '{"seed_id": "ref-finance.testnet@9"}'
+near view $FARMING list_farms_by_seed "{\"seed_id\": \"$EX@9\"}"
 # return list
 [
   {
@@ -134,7 +144,7 @@ near view $FARMING list_farms_by_seed '{"seed_id": "ref-finance.testnet@9"}'
 **single farm info**
 
 ```bash
-near view $FARMING get_farm '{"farm_id": "ref-finance.testnet@11#0"}'
+near view $FARMING get_farm "{\"farm_id\": \"$EX@11#0\"}"
 # return dict
 {
   farm_id: 'ref-finance.testnet@11#0',
@@ -161,14 +171,14 @@ near view $FARMING list_rewards '{"account_id": "pika456.testnet"}'
 #return dict
 { 'rft.tokenfactory.testnet': '281999999999' }
 
-near view $FARMING get_reward '{"account_id": "pika456.testnet", "token_id": "rft.tokenfactory.testnet"}'
+near view $FARMING get_reward "{\"account_id\": \"pika456.testnet\", \"token_id\": \"$TOKEN\"}"
 #return number string
 '281999999999'
 ```
 
 **get unclaimed**
 ```bash
-near view $FARMING get_unclaimed_reward '{"account_id": "pika456.testnet", "farm_id": "ref-finance.testnet@30#0"}'
+near view $FARMING get_unclaimed_reward "{\"account_id\": \"pika456.testnet\", \"farm_id\": \"$EX@30#0\"}"
 #return number string
 '2429999999999'
 ```
@@ -184,6 +194,54 @@ near view $FARMING list_user_seeds '{"account_id": "pika456.testnet"}'
 ```
 
 ## stake/unstake seeds
+---
+```bash
+# if needed, register user to the farming
+near call $FARMING storage_deposit '{"account_id": "u1.testnet", "registration_only": true}' --account_id=u1.testnet --amount=1
+
+# if needed, register farming contract to seed token
+near call $EX mft_register "{\"token_id\":\"31\", \"account_id\": \"$FARMING\"}" --account_id=u1.testnet --amount=0.01
+
+# staking
+near call $EX mft_transfer_call "{\"receiver_id\": \"$FARMING\", \"token_id\":\"31\", \"amount\": \"1000000000000000000000000\", \"msg\": \"\"}" --account_id=u1.testnet --amount=0.000000000000000000000001
+
+# unstaking
+near call $FARMING withdraw_seed "{\"seed_id\": \"$EX@31\", \"amount\": \"1000000000000000000000000\"}" --account_id=u1.testnet --amount=0.000000000000000000000001
+```
+
+## claim reward
+---
+```bash
+# you can claim reward per farm
+near call $FARMING claim_reward_by_farm "{\"farm_id\": \"$EX@0#1\"}" --account_id=u1.testnet --amount=0.000000000000000000000001
+# or you can claim reward per seed (kind of batch claim)
+near call $FARMING claim_reward_by_seed "{\"seed_id\": \"$EX@0\"}" --account_id=u1.testnet --amount=0.000000000000000000000001
+
+```
+
+
+## withdraw reward token
+---
+```bash
+# amount set to 0 means withdraw all balance
+near call $FARMING withdraw_reward "{\"token_id\": \"$TOKEN\", \"amount\": \"0\"}" --account_id=u1.testnet --amount=0.000000000000000000000001
+```
 
 
 ## create farm
+---
+To create a farm, you need prepare farming terms.  
+```bash
+near call $FARMING create_simple_farm "{\"terms\": {\"seed_id\": \"$EX@31\", \"reward_token\": \"$TOKEN\", \"start_at\": \"0\", \"reward_per_session\": \"10000000000000000000\", \"session_interval\": \"3600\"}}\" --account_id=pika456.testnet --amount 0.01
+# this will return a farm id like ref-finance.testnet@31#0
+```
+At this point, this is a farm with no reward deposited, farm status is Created.  
+
+To activate a farm, deposit some reward token into the farm with ft_transfer_call.
+```bash
+# if needed, register farming contract to reward token
+near call $TOKEN storage_deposit "{\"account_id\": \"$FARMING\"}" --account_id=pika456.testnet --amount 0.00125
+# deposit reward token into the farm
+near call $TOKEN ft_transfer_call "{\"receiver_id\": \"$FARMING\", \"amount\": \"2400000000000000000000\", \"msg\": \"$EX@31#0\"}" --account_id=$REF_OWNER --amount=0.000000000000000000000001 --gas=100000000000000
+```
+Note that when all deposited reward token are distributed out, the farm enters Ended status.
