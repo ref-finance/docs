@@ -66,6 +66,7 @@ Note: to get detailed implement of that distribution logic, please refer to the 
 * Cleared, A farm that has ended and no unclaimed reward, can be removed from the contract. After removal, this farm is in this Cleared status. (You can never get this status from contract);
 
 ### Storage Management
+
 Each user would have a place to store his reward tokens balance, staked seed tokens balance, and last time `RPS` for each farm he involves. So, user storage management is needed.
 
 Although the frontend would take care all of the storage details for users, it is still not bad to understand the core logic behind, especially there is kind of post-pay style exists in our storage management.
