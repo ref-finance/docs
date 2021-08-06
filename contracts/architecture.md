@@ -9,5 +9,6 @@ The source code for Ref Finance smart contracts can be found on [GitHub](https:/
 | Contract | Function |
 | - | - |
 | [ref-exchange](ref-exchange.md) | The exchange contract |
+| [ref-farming](understanding_ref-farming.md) | The farming contract |
 
 

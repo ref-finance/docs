@@ -23,7 +23,7 @@ export TOKEN=token.ref-finance.testnet
 % near view $FARMING get_metadata
 # return statics
 {
-  version: '0.4.2',
+  version: '0.5.1',
   owner_id: 'ref_finance_owner.testnet',
   farmer_count: '4',
   farm_count: '7',
@@ -51,7 +51,8 @@ near view $FARMING list_farms '{"from_index": 0, "limit": 100}'
     cur_round: '600',
     last_round: '600',
     claimed_reward: '4490147960435',
-    unclaimed_reward: '1509852039565'
+    unclaimed_reward: '1509852039565',
+    beneficiary_reward: '0'
   },
   ...
 ]
@@ -132,7 +133,8 @@ near view $FARMING list_farms_by_seed "{\"seed_id\": \"$EX@9\"}"
     cur_round: '38',
     last_round: '0',
     claimed_reward: '0',
-    unclaimed_reward: '38000000000000000000000000'
+    unclaimed_reward: '38000000000000000000000000',
+    beneficiary_reward: '0'
   },
   ...
 ]
@@ -159,7 +161,8 @@ near view $FARMING get_farm "{\"farm_id\": \"$EX@11#0\"}"
   cur_round: '38',
   last_round: '0',
   claimed_reward: '0',
-  unclaimed_reward: '380000000000000000000'
+  unclaimed_reward: '380000000000000000000',
+  beneficiary_reward: '0'
 }
 ```
 
