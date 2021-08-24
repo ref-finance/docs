@@ -13,8 +13,8 @@
 |RR|Reward Round in num|The rewards are released by round, and round starts from 1, see next chapter for details|
 
 ## features
-* Multi-farming, staking one seed token can gain multiple rewards on multiple farm;
-* Farm creation is free and open;
+* Multi-farming, staking one seed token can gain multiple rewards on multiple farms;
+* No freezing time when un-stake;
 * Both FT and multi-FT are supported as seed;
 
 
@@ -29,11 +29,11 @@ different farm can (not must) has different reward token.
 To create a farm, we should settle five params:
 * seed, which seed token this farm accepts;
 * reward, which reward token this farm gives;
-* when to start, in block height, if 0 is given, then immediately starts when reward token deposits in;
+* when to start, in timestamp seconds, if 0 is given, then immediately starts when reward token deposits in;
 * round interval, each round lasts in block counts;  
 * total reward per round;
 
-And then transfer reward token into the farm using ft_transfer_call interface to bring farm_id information in.
+And then transfer reward token into the farm using ft_transfer_call interface with `farm_id` in msg field.
 
 ### Reward Distribution
 Every running farm would release reward per reward round. Those released reward would exist in a form of `user_unclaimed_reward` for each user.  

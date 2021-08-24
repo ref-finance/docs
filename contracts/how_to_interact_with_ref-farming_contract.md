@@ -23,7 +23,7 @@ export TOKEN=token.ref-finance.testnet
 % near view $FARMING get_metadata
 # return statics
 {
-  version: '0.5.1',
+  version: '1.0.0',
   owner_id: 'ref_finance_owner.testnet',
   farmer_count: '4',
   farm_count: '7',
@@ -44,9 +44,9 @@ near view $FARMING list_farms '{"from_index": 0, "limit": 100}'
     farm_status: 'Ended',
     seed_id: 'ref-finance.testnet@20',
     reward_token: 'rft.tokenfactory.testnet',
-    start_at: '51012253',
+    start_at: 1629771373,
     reward_per_session: '10000000000',
-    session_interval: '3600',
+    session_interval: 3600,
     total_reward: '6000000000000',
     cur_round: '600',
     last_round: '600',
@@ -58,9 +58,10 @@ near view $FARMING list_farms '{"from_index": 0, "limit": 100}'
 ]
 ```
 Note: 
+* outdated_farms are excluded;
 * There are three `farm_status` in contract, they are Created, Running, Ended;
-* `start_at` is in block height;
-* `session_interval` is in block num;
+* `start_at` is timestamp in seconds;
+* `session_interval` is timestamp in seconds;
 
 **all seeds with pagination**
 ```bash
@@ -126,9 +127,9 @@ near view $FARMING list_farms_by_seed "{\"seed_id\": \"$EX@9\"}"
     farm_status: 'Running',
     seed_id: 'ref-finance.testnet@9',
     reward_token: 'wrap.testnet',
-    start_at: '55736403',
+    start_at: 1629771373,
     reward_per_session: '1000000000000000000000000',
-    session_interval: '3600',
+    session_interval: 3600,
     total_reward: '100000000000000000000000000',
     cur_round: '38',
     last_round: '0',
@@ -235,7 +236,7 @@ near call $FARMING withdraw_reward "{\"token_id\": \"$TOKEN\", \"amount\": \"0\"
 ---
 To create a farm, you need prepare farming terms.  
 ```bash
-near call $FARMING create_simple_farm "{\"terms\": {\"seed_id\": \"$EX@31\", \"reward_token\": \"$TOKEN\", \"start_at\": \"0\", \"reward_per_session\": \"10000000000000000000\", \"session_interval\": \"3600\"}}\" --account_id=pika456.testnet --amount 0.01
+near call $FARMING create_simple_farm "{\"terms\": {\"seed_id\": \"$EX@31\", \"reward_token\": \"$TOKEN\", \"start_at\": 0, \"reward_per_session\": \"10000000000000000000\", \"session_interval\": 3600}}\" --account_id=pika456.testnet --amount 0.01
 # this will return a farm id like ref-finance.testnet@31#0
 ```
 At this point, this is a farm with no reward deposited, farm status is Created.  
@@ -247,4 +248,4 @@ near call $TOKEN storage_deposit "{\"account_id\": \"$FARMING\"}" --account_id=p
 # deposit reward token into the farm
 near call $TOKEN ft_transfer_call "{\"receiver_id\": \"$FARMING\", \"amount\": \"2400000000000000000000\", \"msg\": \"$EX@31#0\"}" --account_id=$REF_OWNER --amount=0.000000000000000000000001 --gas=100000000000000
 ```
-Note that when all deposited reward token are distributed out, the farm enters Ended status.
+Note: Only owner of this contract can create farms.
